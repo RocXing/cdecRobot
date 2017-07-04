@@ -97,13 +97,25 @@ def handle_score_one(msg):
 
             if re.search(name, msg.text):
                 text += "%d\t%s\t%d\t%s\n" % (counter, name, score, rate)
+                matches = request_participant_score(name)
+                for match in matches[:5]:
+                    match_id = match["match_id"]
+                    if match["result"]:
+                        result = u"胜"
+                    else:
+                        result = u"负"
+                    delta = match["delta"]
+                    team = match["team"]
+                    time = match["time"]
+                    text += ur"%s\t%s(%d)\t队伍%d\t%s\n" % (time, result, delta, team, match_id)
         if len(text) > 0:
             text = text[:-1]
             msg.user.send(u'@%s\u2005\n%s' % (msg.actualNickName, text))
         else:
             text = u"没找到这个人"
             msg.user.send(u'@%s\u2005 %s' % (msg.actualNickName, text))
-    except:
+    except Exception as e:
+        print e
         text = u"cdec机器人挂掉啦！"
         normal_send(msg, text)
 
@@ -202,6 +214,15 @@ def request_record(match_id, winner):
     url = "http://rocxing.wang/cdec/api/match/record"
     params = {"matchId": match_id, "winner": int(winner)}
     data = json.loads(post(url, params), encoding="utf-8")
+    if data["status"] == 0:
+        return data["data"]
+    else:
+        raise Exception()
+
+
+def request_participant_score(name):
+    url = "http://rocxing.wang/cdec/api/participant/score?" + urllib.urlencode({"name": name})
+    data = json.loads(urllib2.urlopen(url).read(), encoding="utf-8")
     if data["status"] == 0:
         return data["data"]
     else:
