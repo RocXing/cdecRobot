@@ -3,6 +3,7 @@
 import re
 import sys
 import json
+import random
 import urllib
 import urllib2
 import itchat
@@ -19,6 +20,7 @@ def text_reply(msg):
 
 
 def handle_msg(msg):
+    roll_re = re.compile(ur"roll$")
     help_re = re.compile(ur"帮助")
     score_all_re = re.compile(ur"(全部|所有人)战绩")
     score_one_re = re.compile(ur"战绩")
@@ -26,6 +28,7 @@ def handle_msg(msg):
     record_re = re.compile(ur"记录胜(负|场)")
 
     scan_list = [
+        [roll_re, handle_roll],
         [help_re, handle_help], [score_all_re, handle_score_all], [score_one_re, handle_score_one],
         [group_re, handle_group], [record_re, handle_record]
     ]
@@ -46,7 +49,12 @@ def handle_msg(msg):
 
 
 def handle_help(msg):
-    text = u"cdec机器人，预期功能：查询战绩，比赛分拨，记录结果，查询个人战绩等"
+    text = u"cdec机器人，预期功能：查询战绩，比赛分拨，记录结果，查询个人战绩，roll等"
+    normal_send(msg, text)
+
+
+def handle_roll(msg):
+    text = u"%d" % random.randint(0, 100)
     normal_send(msg, text)
 
 
